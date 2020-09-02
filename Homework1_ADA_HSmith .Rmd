@@ -1,0 +1,193 @@
+---
+title: "ADA Homework 1"
+author: "Holly Smith"
+date: "8/27/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r, echo=FALSE}
+#Having trouble getting the document to HTML and PDF. Below is the solution found in StackOverflow
+#https://stackoverflow.com/questions/30519673/cant-resolve-error-in-rmd-file-anonymous-withcallinghandlers-withvisi
+
+knitr::opts_chunk$set(error = TRUE)
+
+```
+
+
+
+
+## 1. Import class one survey data from our Github site (https://github.com/kijohnson/ADA-FAll-2020) (The dataset called ‘Class 1 Survey Fall 2020.csv’ is located in the class one folder), calling the R dataframe that you create C1survey.
+```{r}
+##Getting necessary package loaded into R
+
+library(readr) #for reading csv file (read_csv())
+C1survey <- 
+  read_csv(
+    "https://raw.githubusercontent.com/kijohnson/ADA-FAll-2020/de669769eb5f0d40e7d347b5fba2d95c33a513a7/Class%20One/Class%201%20Survey%20Fall%202020.csv"
+    )
+
+```
+
+## 2. Determine: a. the number of observations (i.e. the number of people who filled out the survey) and b. the number of variables in the dataframe.
+```{r, eval=FALSE}
+#Using the dim statement will ask R for the number of observations and variables in my dataframe "C1survey"
+
+dim(C1survey)
+
+#The output for this statement is 32 observations and 27 variables
+```
+
+## 3. a. Rename the column variables to something shorter and that is descriptive of what the variable is about (for example like_dogs for the ‘Do you like dogs?’ question variable) and b. Display that they are renamed.
+```{r}
+#Getting a list of the columns names that already exist
+varlist <- colnames(C1survey)
+varlist
+
+#Changing the variables names to something better
+names(C1survey)<-c(
+  "id", "like_cats", "like_dogs", "desert_island", "slogan", "fave_day",
+  "daytime_pref", "fave_food", "fave_drink", "fave_season", "fave_month", "hobby",
+  "degree", "specialization", "prime_software", "exp_R", "comf_code", "length_code",
+  "hope_learn", "ph_interest","fave_number", "birth_day", "birth_month",
+  "home_country", "home_state", "home_city", "education")
+
+#Check to make sure they are correctly renamed
+varlist <- colnames(C1survey)
+varlist
+```
+
+## 4. Write code to determine and display the number of factor, integer, numerical, and character variables there are in the C1survey dataset.
+```{r, eval=FALSE}
+#Using "table" will put the output from "sapply" into a prettier, easy to read format
+table(sapply(C1survey, class))
+
+#Output: Character (23), Numeric (4)
+```
+
+## 5. a. Using code, check the bday and bmonth variables for any unusual or missing values. If you find any, b. describe what you will do with the unusual values in a comment before or immediately following the code that does it, and c. after you have cleaned up any unusual values, find the median bday and month. *Note: please make sure that your bday and month variables are numeric before doing statistics
+```{r, eval=FALSE}
+#Checking the birthday date variable
+#Observation 31 displays 26-Mar and will need to be corrected
+view(C1survey[1:32,22])
+
+#Checking the birthday month variable
+#Observations 8, 17, 25, and 31 all display the month in characters and will need to be corrected
+view(C1survey[1:32,23])
+```
+
+### Correcting the unusual variables from the previous chunk
+#### Correction will be done by telling R to change the character variable to the correct numeric value instead (using the as.character statement). The new variable will still be treated as a character variable, so we will have to convert this back to numeric.
+```{r, eval=FALSE}
+#Birthday date correction
+C1survey$birth_day <- as.character(C1survey$birth_day)
+C1survey$birth_day[C1survey$birth_day == "26-Mar"]<-26
+
+#Birthday month correction
+C1survey$birth_month<-as.character(C1survey$birth_month)
+C1survey$birth_month[C1survey$birth_month == "december"]<-12
+C1survey$birth_month[C1survey$birth_month == "August"]<-8
+C1survey$birth_month[C1survey$birth_month == "March"]<-3
+
+#Need to change these variables into numeric instead of character
+C1survey$birth_day<-as.numeric(as.character(C1survey$birth_day))
+C1survey$birth_month<-as.numeric(as.character(C1survey$birth_month))
+
+```
+
+### Finding the median of the birthday date and month variables
+```{r, eval=FALSE}
+#Code for median of birth_day
+median(C1survey$birth_day, na.rm=TRUE)
+#Median birthday date is 18
+
+#Code for median of birth_month
+median(C1survey$birth_month, na.rm=TRUE)
+#Median birth month is 8
+```
+
+## 6. a. Create a new variable called bseason that gives the season according to Northern Meteorological season in which respondents were born (winter=12/1 to 2/29, spring=3/1 to 5/31, summer=6/1 to 8/31, fall=9/1 to 11/30). b. Using the table function, print a table of Seasons in the columns and bmonths in the rows that allows you to check that the coding is correct c. Sum the columns using the addmargins function to answer the question of how many classmates were born in each season? Include your answer in the code you turn in.
+```{r, eval=FALSE}
+#The new bseasons variable with the correct seasons for each month 
+
+#Other way to code: C1survey$bseasons[C1survey$birth_month%in%c(1,2,12)]<-"winter"
+#Or can code this way:
+# C1survey$bseasons[C1survey$birth_month %in%(1:2]<-'winter'
+# C1survey$bseasons[C1survey$birth_month %in% 3:5]<-'spring'
+# C1survey$bseasons[C1survey$birth_month %in% 6:8]<-'summer'
+# C1survey$bseasons[C1survey$birth_month %in% 9:11]<-'fall'
+# C1survey$bseasons[C1survey$birth_month %in% 12]<-'winter'
+
+#Winter
+C1survey$bseasons[C1survey$birth_month == 12] <-"Winter"
+C1survey$bseasons[C1survey$birth_month == 1] <- "Winter"
+C1survey$bseasons[C1survey$birth_month == 2] <- "Winter"
+
+#Spring
+C1survey$bseasons[C1survey$birth_month == 3] <- "Spring"
+C1survey$bseasons[C1survey$birth_month == 4] <- "Spring"
+C1survey$bseasons[C1survey$birth_month == 5] <- "Spring"
+
+#Summer
+C1survey$bseasons[C1survey$birth_month == 6] <- "Summer"
+C1survey$bseasons[C1survey$birth_month == 7] <- "Summer"
+C1survey$bseasons[C1survey$birth_month == 8] <- "Summer"
+
+#Fall
+C1survey$bseasons[C1survey$birth_month == 9] <- "Fall"
+C1survey$bseasons[C1survey$birth_month == 10] <- "Fall"
+C1survey$bseasons[C1survey$birth_month == 11] <- "Fall"
+```
+
+### Crosstabbing bseasons and birth_month to ensure the seasons have been coded correctly and summing columns
+#### Note: The code for this runs correctly in R; however, in the Rmd HTML file it says there's an error because the argument lengths aren't the same. I don't know where this error is coming from because it works perfectly on the back end
+```{r}
+#First we make the table of the two variables. The first variable will be the rows and the second will be the columns
+table(C1survey$birth_month, C1survey$bseasons)
+
+#This will get us the column totals for each season
+addmargins(table(C1survey$birth_month, C1survey$bseasons), FUN=sum)
+
+#Results: Fall: 10, Spring: 7, Summer: 9, Winter: 6
+```
+
+## 7. Pick your favorite variable to analyze, come up with a question you want to answer with that variable, generate the code, and provide an answer to your question. Describe what you did using comments (i.e. #’s).
+### Question: how does the mean of liking cats and dogs differ across the ADA class?
+```{r, eval=FALSE}
+#First we will need to recode the character variable into numeric variables
+#Cat variable conversion
+C1survey$like_cats<-as.character(C1survey$like_cats)
+C1survey$like_cats[C1survey$like_cats == "Yes"]<-1
+C1survey$like_cats[C1survey$like_cats == "No"]<-2
+C1survey$like_cats[C1survey$like_cats == "Ambivalent"]<-3
+C1survey$like_cats<-as.numeric(as.character(C1survey$like_cats))
+
+#Dog variable conversion
+C1survey$like_dogs<-as.character(C1survey$like_dogs)
+C1survey$like_dogs[C1survey$like_dogs == "Yes"]<-1
+C1survey$like_dogs[C1survey$like_dogs == "No"]<-2
+C1survey$like_dogs[C1survey$like_dogs == "Ambivalent"]<-3
+C1survey$like_dogs<-as.numeric(as.character(C1survey$like_dogs))
+
+#Getting the mean of cats
+mean(C1survey$like_cats, na.rm=TRUE)
+#Output: 1.65625
+
+#Getting the mean of dogs
+mean(C1survey$like_dogs, na.rm=TRUE)
+#Output: 1.40625
+
+#From these data, we can see that the mean for dogs is lower, meaning that there are probably more peope who prefer dogs. 
+
+#Now we can look at the frequency breakdown between each category to have a closer look - I'm doing this just out of curiosity
+table(C1survey$like_cats) #Yes: 19, No:5, Ambivalent: 8
+table(C1survey$like_dogs) #Yes: 24, No:3, Ambivalent: 5
+
+#We can conclude with these results that the mean number of individuals in this semester's ADA class who likes dogs is higher than those who like cats. While we cannot state if this is statistically significant, we can see there is a slight distinction between the preference of the two animals. 
+```
+
+
+
+
+
+
